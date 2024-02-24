@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import fetch_openml
 import joblib
-import io as BytesIO
+import os
 
 # Load MNIST data
 mnist = fetch_openml('mnist_784', version=1)
@@ -19,97 +19,75 @@ mnist_target = mnist.target.astype(np.int32)
 def preprocess(data, target):
     return data, target
 
-class ClientTrainingApp:
-    def __init__(self):
-        st.title("Aggregate Federated Learning")
-
-        self.num_epochs = 1  # Initialize number of epochs
-
-        # Create hyperparameters section
-        st.sidebar.title("Hyperparameters")
-        self.num_epochs = st.sidebar.slider("Number of Epochs", 1, 50, 1)
-        self.learning_rate = st.sidebar.slider("Learning Rate", 0.00001, 1.0, 0.01)
-        self.batch_size = st.sidebar.slider("Batch Size", 50, 300, 50)
-        self.activation_function = st.sidebar.selectbox("Activation Function", ["ReLU", "Sigmoid", "Tanh", "Softmax"])
-
-        # Button to start training
-        if st.sidebar.button("Start Training"):
-            self.train_clients()
-
-    def train_clients(self):
-        train_data, train_labels = preprocess(mnist_data, mnist_target)
-
-        # Define models for each client
-        models = {
-            1: [DecisionTreeClassifier()],
-            2: [DecisionTreeClassifier(), GaussianNB()],
-            3: [DecisionTreeClassifier(), GaussianNB(), KNeighborsClassifier()],
-            4: [DecisionTreeClassifier(), GaussianNB(), KNeighborsClassifier(), RandomForestClassifier()]
-        }
-
-        for client_number, client_models in models.items():
-            st.write(f"Training started for Client {client_number}...")
-            accuracies = []
-            build_times = []
-            classification_times = []
-            trained_models = []
-
-            for model in client_models:
-                start_time = time.time()
-                for epoch in range(self.num_epochs):
-                    model.fit(train_data, train_labels)
-                build_time = time.time() - start_time
-
-                start_time = time.time()
-                predictions = model.predict(train_data)
-                classification_time = time.time() - start_time
-
-                accuracy = accuracy_score(train_labels, predictions)
-                accuracies.append(accuracy)
-                build_times.append(build_time)
-                classification_times.append(classification_time)
-
-                trained_models.append(model)
-
-            self.plot_graphs(build_times, classification_times, accuracies, client_models, client_number)
-
-            # Download trained models
-            self.download_models(trained_models, client_number)
-
-    def download_models(trained_models, client_number):
-        # Serialize and save the trained models to bytes
-        model_bytes = []
-        for idx, model in enumerate(trained_models):
-            model_bytes.append(joblib.dump(model))
+# Define model training function
+def train_client(client_number, num_epochs):
+    train_data, train_labels = preprocess(mnist_data, mnist_target)
     
-        # Create a download link for each model
-        for idx, model_byte in enumerate(model_bytes):
-            model_filename = f"client{client_number}_model_{idx + 1}.joblib"
-            st.download_button(
-                label=f"Download {model_filename}",
-                data=model_byte,
-                file_name=model_filename,
-                mime='application/octet-stream'
-            )
+    # Define models for each client
+    models = {
+        1: [DecisionTreeClassifier()],
+        2: [DecisionTreeClassifier(), GaussianNB()],
+        3: [DecisionTreeClassifier(), GaussianNB(), KNeighborsClassifier()],
+        4: [DecisionTreeClassifier(), GaussianNB(), KNeighborsClassifier(), RandomForestClassifier()]
+    }
+    
+    accuracies = []
+    build_times = []
+    classification_times = []
+    
+    trained_models = []  # Store trained models for later use
+    
+    for model in models[client_number]:
+        start_time = time.time()
+        for epoch in range(num_epochs):  # Use selected number of epochs
+            model.fit(train_data, train_labels)
+        build_time = time.time() - start_time
+        
+        start_time = time.time()
+        predictions = model.predict(train_data)
+        classification_time = time.time() - start_time
+        
+        accuracy = accuracy_score(train_labels, predictions)
+        accuracies.append(accuracy)
+        build_times.append(build_time)
+        classification_times.append(classification_time)
 
-        st.write(f"Model for Client {client_number} downloaded successfully!")
+        trained_models.append(model)  # Store the trained model
+    
+    return accuracies, build_times, classification_times, trained_models
 
-    def plot_graphs(self, build_times, classification_times, accuracies, models, client_number):
-        st.write(f"### Results for Client {client_number}")
+# Deployed Streamlit app code
+st.title("Aggregate Federated Learning")
 
-        st.write("#### Accuracy")
-        st.bar_chart({type(model).__name__: accuracy for model, accuracy in zip(models, accuracies)})
+# Sidebar for hyperparameters
+st.sidebar.title("Hyperparameters")
+num_epochs = st.sidebar.slider("Number of Epochs", 1, 50, 1)
 
-        st.write("#### Build Time")
-        st.bar_chart({type(model).__name__: build_time for model, build_time in zip(models, build_times)})
+# Training
+for i in range(1, 5):
+    st.write(f"## Training Client {i}")
+    accuracies, build_times, classification_times, trained_models = train_client(i, num_epochs)
+    
+    # Display metrics
+    st.write(f"Accuracy: {max(accuracies)}")
+    st.write(f"Build Time: {sum(build_times)}")
+    st.write(f"Classification Time: {sum(classification_times)}")
 
-        st.write("#### Classification Time")
-        st.bar_chart({type(model).__name__: classification_time for model, classification_time in zip(models, classification_times)})
+    # Download models
+    if st.button(f"Download Model for Client {i}"):
+        save_dir = "models"
+        os.makedirs(save_dir, exist_ok=True)
+        for idx, model in enumerate(trained_models):
+            model_filename = f"client{i}_model_{idx + 1}.joblib"
+            model_path = os.path.join(save_dir, model_filename)
+            joblib.dump(model, model_path)
+        st.success(f"Model for Client {i} downloaded successfully!")
 
-if __name__ == "__main__":
-    app = ClientTrainingApp()
-
-
-
-
+# Display dataset samples
+st.write("## Dataset Samples")
+mnist = tf.keras.datasets.mnist
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+num_samples = 7
+for i in range(num_samples):
+    st.image(train_images[i], caption=f"Label: {train_labels[i]}", width=100)
 
