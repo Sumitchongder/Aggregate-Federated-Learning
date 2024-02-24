@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[4]:
-
-
 import streamlit as st
 import time
 import numpy as np
@@ -123,14 +117,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-# In[5]:
-
-
-pip install streamlit
-
-
-# In[ ]:
 
 
 
