@@ -8,6 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import fetch_openml
 import joblib
+import io as BytesIO
 
 # Load MNIST data
 mnist = fetch_openml('mnist_784', version=1)
@@ -75,18 +76,21 @@ class ClientTrainingApp:
             # Download trained models
             self.download_models(trained_models, client_number)
 
-    def download_models(self, trained_models, client_number):
-        # Specify the directory where models will be saved
-        save_dir = "downloads"
-
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-
-        # Serialize and save the trained models
-        for idx, model in enumerate(trained_models):
-            model_filename = f"client{client_number}_model_{idx + 1}.joblib"
-            model_path = os.path.join(save_dir, model_filename)
-            joblib.dump(model, model_path)
+    def download_models(trained_models, client_number):
+    # Serialize and save the trained models to bytes
+    model_bytes = []
+    for idx, model in enumerate(trained_models):
+        model_bytes.append(joblib.dump(model))
+    
+    # Create a download link for each model
+    for idx, model_byte in enumerate(model_bytes):
+        model_filename = f"client{client_number}_model_{idx + 1}.joblib"
+        st.download_button(
+            label=f"Download {model_filename}",
+            data=model_byte,
+            file_name=model_filename,
+            mime='application/octet-stream'
+        )
 
         st.write(f"Model for Client {client_number} downloaded successfully!")
 
