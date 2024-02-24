@@ -77,20 +77,20 @@ class ClientTrainingApp:
             self.download_models(trained_models, client_number)
 
     def download_models(trained_models, client_number):
-    # Serialize and save the trained models to bytes
-    model_bytes = []
-    for idx, model in enumerate(trained_models):
-        model_bytes.append(joblib.dump(model))
+        # Serialize and save the trained models to bytes
+        model_bytes = []
+        for idx, model in enumerate(trained_models):
+            model_bytes.append(joblib.dump(model))
     
-    # Create a download link for each model
-    for idx, model_byte in enumerate(model_bytes):
-        model_filename = f"client{client_number}_model_{idx + 1}.joblib"
-        st.download_button(
-            label=f"Download {model_filename}",
-            data=model_byte,
-            file_name=model_filename,
-            mime='application/octet-stream'
-        )
+        # Create a download link for each model
+        for idx, model_byte in enumerate(model_bytes):
+            model_filename = f"client{client_number}_model_{idx + 1}.joblib"
+            st.download_button(
+                label=f"Download {model_filename}",
+                data=model_byte,
+                file_name=model_filename,
+                mime='application/octet-stream'
+            )
 
         st.write(f"Model for Client {client_number} downloaded successfully!")
 
