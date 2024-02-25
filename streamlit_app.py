@@ -46,9 +46,11 @@ if st.button('Train Client 1'):
     st.write('Model trained and evaluated successfully!')
 
 # Download Model for Client 1 button
-if model is not None and st.button('Download Model for Client 1'):
-    joblib.dump(model, 'client1_model.joblib')
-    st.write('Model downloaded successfully!')
+if model is not None:
+    st.button('Download Model for Client 1', key='download_model')
+    if st.button('Download Model for Client 1'):
+        joblib.dump(model, 'client1_model.joblib')
+        st.write('Model downloaded successfully!')
 
 # Display graphs
 if st.button('Show Graphs'):
