@@ -50,13 +50,13 @@ if st.button('Train Client 1'):
     output_elem = st.empty()
     output_elem.text(output_text)
 
+
 # Download Model for Client 1 button
 if model is not None:
-    if st.button('Download Model for Client 1'):
-        # Specify the path to the Downloads folder
-        download_path = os.path.join(os.path.expanduser("~"), "Downloads", "client1_model.joblib")
-        joblib.dump(model, download_path)
-        st.write('Model downloaded successfully! It should be in your Downloads folder.')
+    joblib.dump(model, "client1_model.joblib")
+    with open("client1_model.joblib", "rb") as f:
+        model_binary = f.read()
+    download_button = st.download_button(label="Download Model for Client 1", data=model_binary, file_name="client1_model.joblib")
 
 # Display graphs
 if st.button('Show Graphs'):
