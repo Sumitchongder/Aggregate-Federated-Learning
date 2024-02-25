@@ -4,7 +4,7 @@ import time
 from sklearn.datasets import fetch_openml
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.externals import joblib
+import joblib
 import matplotlib.pyplot as plt
 import os
 
