@@ -35,6 +35,8 @@ st.sidebar.title('Hyperparameter Tuning')
 max_depth = st.sidebar.slider('Max Depth', 1, 20, 1)
 min_samples_split = st.sidebar.slider('Min Samples Split', 2, 100, 2)
 
+model = None
+
 # Train Client 1 button
 if st.button('Train Client 1'):
     model, accuracy, train_time, inference_time = train_model(max_depth, min_samples_split)
@@ -44,7 +46,7 @@ if st.button('Train Client 1'):
     st.write('Model trained and evaluated successfully!')
 
 # Download Model for Client 1 button
-if st.button('Download Model for Client 1'):
+if model is not None and st.button('Download Model for Client 1'):
     joblib.dump(model, 'client1_model.joblib')
     st.write('Model downloaded successfully!')
 
