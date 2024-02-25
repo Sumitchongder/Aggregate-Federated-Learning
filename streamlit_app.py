@@ -47,7 +47,6 @@ if st.button('Train Client 1'):
 
 # Download Model for Client 1 button
 if model is not None:
-    st.button('Download Model for Client 1', key='download_model')
     if st.button('Download Model for Client 1'):
         joblib.dump(model, 'client1_model.joblib')
         st.write('Model downloaded successfully!')
