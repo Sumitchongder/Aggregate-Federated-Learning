@@ -46,16 +46,10 @@ if st.button('Train Client 1'):
     st.write('Inference Time:', inference_time)
     st.write('Model trained and evaluated successfully!')
 
+
 # Download Model for Client 1 button
 if model is not None:
-    if st.button('Download Model for Client 1'):
-        try:
-            # Specify the path to the Downloads folder
-            download_path = "C:\\Users\\Sumit\\Downloads\\client1_model.joblib"
-            joblib.dump(model, download_path)
-            st.write('Model downloaded successfully! It should be in your Downloads folder.')
-        except Exception as e:
-            st.error(f"Error downloading the model: {str(e)}")
+    download_button = st.download_button(label="Download Model for Client 1", data=joblib.dump(model, "client1_model.joblib"), file_name="client1_model.joblib")
 
 # Display graphs
 if st.button('Show Graphs'):
