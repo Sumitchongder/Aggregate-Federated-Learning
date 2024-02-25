@@ -48,8 +48,13 @@ if st.button('Train Client 1'):
 
 
 # Download Model for Client 1 button
+# Download Model for Client 1 button
 if model is not None:
-    download_button = st.download_button(label="Download Model for Client 1", data=joblib.dump(model, "client1_model.joblib"), file_name="client1_model.joblib")
+    joblib.dump(model, "client1_model.joblib")
+    with open("client1_model.joblib", "rb") as f:
+        model_binary = f.read()
+    download_button = st.download_button(label="Download Model for Client 1", data=model_binary, file_name="client1_model.joblib")
+
 
 # Display graphs
 if st.button('Show Graphs'):
