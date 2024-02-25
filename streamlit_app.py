@@ -6,6 +6,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 import joblib
 import matplotlib.pyplot as plt
+import os
 
 # Load MNIST dataset
 mnist = fetch_openml('mnist_784', version=1)
@@ -48,8 +49,10 @@ if st.button('Train Client 1'):
 # Download Model for Client 1 button
 if model is not None:
     if st.button('Download Model for Client 1'):
-        joblib.dump(model, 'client1_model.joblib')
-        st.write('Model downloaded successfully!')
+        # Specify the path to the Downloads folder
+        download_path = os.path.join(os.path.expanduser("~"), "Downloads", "client1_model.joblib")
+        joblib.dump(model, download_path)
+        st.write('Model downloaded successfully! It should be in your Downloads folder.')
 
 # Display graphs
 if st.button('Show Graphs'):
