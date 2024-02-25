@@ -41,20 +41,22 @@ model = None
 # Train Client 1 button
 if st.button('Train Client 1'):
     model, accuracy, train_time, inference_time = train_model(max_depth, min_samples_split)
-    st.write('Accuracy:', accuracy)
-    st.write('Training Time:', train_time)
-    st.write('Inference Time:', inference_time)
-    st.write('Model trained and evaluated successfully!')
+    output_text = f"""
+        Accuracy: {accuracy}
+        Training Time: {train_time}
+        Inference Time: {inference_time}
+        Model trained and evaluated successfully!
+    """
+    output_elem = st.empty()
+    output_elem.text(output_text)
 
-
-# Download Model for Client 1 button
 # Download Model for Client 1 button
 if model is not None:
-    joblib.dump(model, "client1_model.joblib")
-    with open("client1_model.joblib", "rb") as f:
-        model_binary = f.read()
-    download_button = st.download_button(label="Download Model for Client 1", data=model_binary, file_name="client1_model.joblib")
-
+    if st.button('Download Model for Client 1'):
+        # Specify the path to the Downloads folder
+        download_path = os.path.join(os.path.expanduser("~"), "Downloads", "client1_model.joblib")
+        joblib.dump(model, download_path)
+        st.write('Model downloaded successfully! It should be in your Downloads folder.')
 
 # Display graphs
 if st.button('Show Graphs'):
@@ -83,4 +85,3 @@ if st.button('Show Graphs'):
     
     plt.tight_layout()
     st.pyplot(fig)
-
